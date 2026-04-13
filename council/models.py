@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import time
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from openai import AsyncOpenAI
 
@@ -60,8 +61,11 @@ async def query_all(model_ids: list[str], prompt: str, config) -> list[ModelResp
     return list(await asyncio.gather(*tasks))
 
 
-async def query_all_stream(model_ids: list[str], prompt: str, config):
-    """Async generator: yields ModelResponse objects as each model completes (fastest first)."""
-    tasks = [asyncio.ensure_future(query_model(mid, prompt, config)) for mid in model_ids]
+async def query_all_stream(model_ids: list[str], prompt: str, config) -> AsyncGenerator[ModelResponse, None]:
+    """Async generator: yields ModelResponse objects as each model completes (fastest first).
+
+If model_ids is empty, yields nothing (no error raised).
+"""
+    tasks = [asyncio.create_task(query_model(mid, prompt, config)) for mid in model_ids]
     for future in asyncio.as_completed(tasks):
         yield await future
