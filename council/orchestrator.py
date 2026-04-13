@@ -92,3 +92,75 @@ async def run_extraction(
             if not r.failed:
                 console.print(f"\n[bold]{r.display_name}[/bold]: {r.content[:400]}")
         return []
+
+
+async def run_synthesis(
+    question: str,
+    round1: list[ModelResponse],
+    debate: list[ModelResponse],
+    config: CouncilConfig,
+) -> str:
+    round1_text = "\n\n".join(
+        f"[{r.display_name}]: {r.content}" for r in round1 if not r.failed
+    )
+    debate_text = "\n\n".join(
+        f"[{r.display_name}]: {r.content}" for r in debate if not r.failed
+    )
+    synthesis_prompt = f"""You have moderated a multi-model AI council on this question:
+
+QUESTION: {question}
+
+ROUND 1 ANSWERS:
+{round1_text}
+
+DEBATE RESPONSES:
+{debate_text}
+
+Produce a final synthesized answer that:
+1. Reflects the consensus view where models agreed
+2. Clearly flags any genuine disagreements that remain unresolved
+3. Gives a clear recommendation where consensus exists — do not hedge when models agree
+4. Briefly notes where models differ without belaboring it
+
+Write directly. Start with the answer, not commentary about the process.
+Add this note at the end on its own line: "⚠️ Note: Model agreement does not guarantee factual accuracy — models may share training biases." """
+
+    response = await query_model(config.synthesizer, synthesis_prompt, config)
+    if response.failed:
+        return f"Synthesis failed: {response.error}"
+    return response.content
+
+
+async def run_council(question: str, config: CouncilConfig) -> None:
+    console.print(Panel(
+        f"[bold]{question}[/bold]",
+        title="[cyan]⚡ Model Council[/cyan]",
+        border_style="cyan",
+    ))
+
+    # Round 1
+    round1 = await run_round1(question, config)
+    active = [r for r in round1 if not r.failed]
+    if len(active) < 2:
+        console.print("[bold red]Council aborted: fewer than 2 models responded.[/bold red]")
+        return
+
+    # Round 2: Debate
+    debate = await run_debate(question, round1, config)
+
+    # Agreement table
+    console.print(Rule("[bold magenta]Agreement Table[/bold magenta]"))
+    await run_extraction(question, round1, debate, config)
+
+    # Final synthesized answer
+    console.print(Rule("[bold green]── Final Answer ──[/bold green]"))
+    synthesizer_name = next(
+        (r.display_name for r in round1 if r.model_id == config.synthesizer),
+        config.synthesizer,
+    )
+    final = await run_synthesis(question, round1, debate, config)
+    console.print(Panel(
+        final,
+        title=f"[green]Synthesized by {synthesizer_name}[/green]",
+        border_style="green",
+    ))

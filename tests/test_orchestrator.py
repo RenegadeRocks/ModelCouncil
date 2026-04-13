@@ -86,3 +86,42 @@ async def test_run_debate_returns_empty_when_only_one_active(mocker):
     config = make_config()
     results = await run_debate("Best database?", round1, config)
     assert results == []
+
+
+@pytest.mark.asyncio
+async def test_run_synthesis_returns_content(mocker):
+    from council.orchestrator import run_synthesis
+
+    round1 = [
+        make_response("gpt-4o", "PostgreSQL"),
+        make_response("claude-sonnet-4-6", "CockroachDB"),
+    ]
+    debate = [
+        make_response("gpt-4o", "I disagree with Claude"),
+        make_response("claude-sonnet-4-6", "I partially agree"),
+    ]
+    mocker.patch(
+        "council.orchestrator.query_model",
+        return_value=make_response("gpt-4o", "Final: PostgreSQL for most cases"),
+    )
+    config = make_config()
+    result = await run_synthesis("Best database?", round1, debate, config)
+    assert "PostgreSQL" in result
+
+
+@pytest.mark.asyncio
+async def test_run_synthesis_returns_error_message_on_failure(mocker):
+    from council.orchestrator import run_synthesis
+
+    round1 = [make_response("gpt-4o", "answer")]
+    debate = [make_response("gpt-4o", "debate")]
+    mocker.patch(
+        "council.orchestrator.query_model",
+        return_value=ModelResponse(
+            model_id="gpt-4o", display_name="GPT-4o",
+            content="", error="timeout"
+        ),
+    )
+    config = make_config()
+    result = await run_synthesis("question?", round1, debate, config)
+    assert "Synthesis failed" in result
