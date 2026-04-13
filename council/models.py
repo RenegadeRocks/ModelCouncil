@@ -7,9 +7,11 @@ from openai import AsyncOpenAI
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 DISPLAY_NAMES: dict[str, str] = {
+    "openai/gpt-4.1": "GPT-4.1",
     "openai/gpt-4o": "GPT-4o",
     "anthropic/claude-sonnet-4-6": "Claude Sonnet 4.6",
-    "google/gemini-1.5-pro": "Gemini 1.5 Pro",
+    "google/gemini-2.5-pro-preview": "Gemini 2.5 Pro",
+    "google/gemini-2.0-flash-001": "Gemini 2.0 Flash",
 }
 
 
@@ -56,3 +58,10 @@ async def query_model(model_id: str, prompt: str, config) -> ModelResponse:
 async def query_all(model_ids: list[str], prompt: str, config) -> list[ModelResponse]:
     tasks = [query_model(mid, prompt, config) for mid in model_ids]
     return list(await asyncio.gather(*tasks))
+
+
+async def query_all_stream(model_ids: list[str], prompt: str, config):
+    """Async generator: yields ModelResponse objects as each model completes (fastest first)."""
+    tasks = [asyncio.ensure_future(query_model(mid, prompt, config)) for mid in model_ids]
+    for future in asyncio.as_completed(tasks):
+        yield await future
