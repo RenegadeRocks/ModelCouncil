@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from dotenv import load_dotenv
 
-VALID_MODELS = {"gpt-4o", "claude-sonnet-4-6", "gemini-1.5-pro"}
-DEFAULT_MODELS = ["gpt-4o", "claude-sonnet-4-6", "gemini-1.5-pro"]
+VALID_MODELS = {"openai/gpt-4o", "anthropic/claude-sonnet-4-6", "google/gemini-1.5-pro"}
+DEFAULT_MODELS = ["openai/gpt-4o", "anthropic/claude-sonnet-4-6", "google/gemini-1.5-pro"]
 
 
 @dataclass
@@ -14,9 +14,7 @@ class CouncilConfig:
     models: list[str]
     synthesizer: str
     debate_rounds: int
-    openai_api_key: str
-    anthropic_api_key: str
-    google_api_key: str
+    openrouter_api_key: str
 
 
 _PROJECT_ROOT = Path(__file__).parent.parent
@@ -52,7 +50,5 @@ def load_config(config_path: Path = _PROJECT_ROOT / "config.json") -> CouncilCon
         models=models,
         synthesizer=synthesizer,
         debate_rounds=debate_rounds,
-        openai_api_key=os.getenv("OPENAI_API_KEY", ""),
-        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
-        google_api_key=os.getenv("GOOGLE_API_KEY", ""),
+        openrouter_api_key=os.getenv("OPENROUTER_API_KEY", ""),
     )

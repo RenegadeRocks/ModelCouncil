@@ -12,24 +12,24 @@ def make_response(model_id, content, display_name=None, error=None):
 
 
 def test_debate_prompt_contains_question():
-    own = make_response("gpt-4o", "PostgreSQL is best", "GPT-4o")
-    others = [make_response("claude-sonnet-4-6", "CockroachDB is best", "Claude")]
+    own = make_response("openai/gpt-4o", "PostgreSQL is best", "GPT-4o")
+    others = [make_response("anthropic/claude-sonnet-4-6", "CockroachDB is best", "Claude")]
     prompt = build_debate_prompt("Best database?", own, others)
     assert "Best database?" in prompt
 
 
 def test_debate_prompt_contains_own_answer():
-    own = make_response("gpt-4o", "PostgreSQL is best", "GPT-4o")
-    others = [make_response("claude-sonnet-4-6", "CockroachDB is best", "Claude")]
+    own = make_response("openai/gpt-4o", "PostgreSQL is best", "GPT-4o")
+    others = [make_response("anthropic/claude-sonnet-4-6", "CockroachDB is best", "Claude")]
     prompt = build_debate_prompt("Best database?", own, others)
     assert "PostgreSQL is best" in prompt
 
 
 def test_debate_prompt_contains_other_answers():
-    own = make_response("gpt-4o", "PostgreSQL is best", "GPT-4o")
+    own = make_response("openai/gpt-4o", "PostgreSQL is best", "GPT-4o")
     others = [
-        make_response("claude-sonnet-4-6", "CockroachDB is best", "Claude"),
-        make_response("gemini-1.5-pro", "Cassandra is best", "Gemini"),
+        make_response("anthropic/claude-sonnet-4-6", "CockroachDB is best", "Claude"),
+        make_response("google/gemini-1.5-pro", "Cassandra is best", "Gemini"),
     ]
     prompt = build_debate_prompt("Best database?", own, others)
     assert "CockroachDB is best" in prompt
@@ -37,17 +37,17 @@ def test_debate_prompt_contains_other_answers():
 
 
 def test_debate_prompt_excludes_failed_others():
-    own = make_response("gpt-4o", "PostgreSQL is best", "GPT-4o")
-    failed = ModelResponse(model_id="gemini-1.5-pro", display_name="Gemini", content="", error="timeout")
-    others = [make_response("claude-sonnet-4-6", "CockroachDB is best", "Claude"), failed]
+    own = make_response("openai/gpt-4o", "PostgreSQL is best", "GPT-4o")
+    failed = ModelResponse(model_id="google/gemini-1.5-pro", display_name="Gemini", content="", error="timeout")
+    others = [make_response("anthropic/claude-sonnet-4-6", "CockroachDB is best", "Claude"), failed]
     prompt = build_debate_prompt("Best database?", own, others)
     assert "timeout" not in prompt
     assert "CockroachDB is best" in prompt
 
 
 def test_debate_prompt_contains_agree_disagree_instruction():
-    own = make_response("gpt-4o", "answer", "GPT-4o")
-    others = [make_response("claude-sonnet-4-6", "other answer", "Claude")]
+    own = make_response("openai/gpt-4o", "answer", "GPT-4o")
+    others = [make_response("anthropic/claude-sonnet-4-6", "other answer", "Claude")]
     prompt = build_debate_prompt("question", own, others)
     assert "AGREE" in prompt
     assert "DISAGREE" in prompt
