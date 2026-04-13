@@ -1,0 +1,5 @@
+{
+  "models": ["gpt-4o", "claude-sonnet-4-6", "gemini-1.5-pro"],
+  "synthesizer": "claude-sonnet-4-6",
+  "debate_rounds": 1
+}
