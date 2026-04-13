@@ -64,7 +64,7 @@ async def query_anthropic(prompt: str, config) -> ModelResponse:
         return ModelResponse(
             model_id=model_id,
             display_name=DISPLAY_NAMES[model_id],
-            content=response.content[0].text,
+            content=response.content[0].text if response.content else "",
             elapsed=time.monotonic() - start,
         )
     except Exception as e:
@@ -89,7 +89,7 @@ async def query_gemini(prompt: str, config) -> ModelResponse:
         return ModelResponse(
             model_id=model_id,
             display_name=DISPLAY_NAMES[model_id],
-            content=response.text,
+            content=response.text or "",
             elapsed=time.monotonic() - start,
         )
     except Exception as e:
