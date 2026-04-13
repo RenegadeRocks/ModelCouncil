@@ -64,3 +64,31 @@ async def run_debate(
 
     console.print(f"\n[dim]Round 2 complete in {elapsed:.1f}s.[/dim]")
     return debate_responses
+
+
+async def run_extraction(
+    question: str,
+    round1: list[ModelResponse],
+    debate: list[ModelResponse],
+    config: CouncilConfig,
+) -> list[dict]:
+    from council.table import build_extraction_prompt, parse_extraction, render_table
+
+    active = [r for r in round1 if not r.failed]
+    prompt = build_extraction_prompt(question, round1, debate)
+    extraction_response = await query_model(config.synthesizer, prompt, config)
+
+    if extraction_response.failed:
+        console.print(f"[red]Claim extraction failed: {extraction_response.error}[/red]")
+        return []
+
+    try:
+        claims = parse_extraction(extraction_response.content, active)
+        render_table(claims, active)
+        return claims
+    except Exception as e:
+        console.print(f"[yellow]Could not parse agreement table ({e}). Showing raw positions.[/yellow]")
+        for r in debate:
+            if not r.failed:
+                console.print(f"\n[bold]{r.display_name}[/bold]: {r.content[:400]}")
+        return []
