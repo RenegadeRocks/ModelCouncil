@@ -1,10 +1,10 @@
 function Skeleton() {
   return (
     <div data-testid="skeleton" className="space-y-3 animate-pulse">
-      <div className="h-3 bg-gray-300 rounded w-3/4" />
-      <div className="h-3 bg-gray-300 rounded w-full" />
-      <div className="h-3 bg-gray-300 rounded w-5/6" />
-      <div className="h-3 bg-gray-300 rounded w-2/3" />
+      <div className="h-3 bg-surface shadow-neu-inset rounded-full w-3/4" />
+      <div className="h-3 bg-surface shadow-neu-inset rounded-full w-full" />
+      <div className="h-3 bg-surface shadow-neu-inset rounded-full w-5/6" />
+      <div className="h-3 bg-surface shadow-neu-inset rounded-full w-2/3" />
     </div>
   )
 }

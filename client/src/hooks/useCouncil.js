@@ -12,8 +12,17 @@ const INITIAL_STATE = {
 
 function applyEvent(state, event) {
   switch (event.type) {
-    case 'phase':
+    case 'phase': {
+      // When debate starts, mark all existing models as 'loading' so skeleton shows
+      if (event.phase === 'debate') {
+        const updatedModels = {}
+        for (const [id, m] of Object.entries(state.models)) {
+          updatedModels[id] = { ...m, status: m.status === 'done' ? 'loading' : m.status }
+        }
+        return { ...state, phase: event.phase, models: updatedModels }
+      }
       return { ...state, phase: event.phase }
+    }
 
     case 'model_response': {
       const existing = state.models[event.model_id] ?? {
@@ -66,6 +75,11 @@ export function useCouncil() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
       })
+
+      if (!response.ok) {
+        setState(prev => ({ ...prev, phase: 'error', error: `Server error ${response.status}` }))
+        return
+      }
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()

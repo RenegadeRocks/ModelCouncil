@@ -40,7 +40,7 @@ describe('useCouncil', () => {
       { type: 'done' },
     ]
 
-    global.fetch.mockResolvedValue({ body: makeStream(events) })
+    global.fetch.mockResolvedValue({ ok: true, body: makeStream(events) })
 
     const { result } = renderHook(() => useCouncil())
 
@@ -62,7 +62,7 @@ describe('useCouncil', () => {
       { type: 'done' },
     ]
 
-    global.fetch.mockResolvedValue({ body: makeStream(events) })
+    global.fetch.mockResolvedValue({ ok: true, body: makeStream(events) })
 
     const { result } = renderHook(() => useCouncil())
 
