@@ -19,7 +19,10 @@ class CouncilConfig:
     google_api_key: str
 
 
-def load_config(config_path: Path = Path("config.json")) -> CouncilConfig:
+_PROJECT_ROOT = Path(__file__).parent.parent
+
+
+def load_config(config_path: Path = _PROJECT_ROOT / "config.json") -> CouncilConfig:
     load_dotenv()
 
     if config_path.exists():
@@ -29,11 +32,10 @@ def load_config(config_path: Path = Path("config.json")) -> CouncilConfig:
         data = {}
 
     models = data.get("models", DEFAULT_MODELS)
-    synthesizer = data.get("synthesizer", models[0])
-    debate_rounds = data.get("debate_rounds", 1)
-
     if len(models) < 2:
         raise ValueError("At least 2 models required in config.json")
+    synthesizer = data.get("synthesizer", models[0])
+    debate_rounds = data.get("debate_rounds", 1)
     if len(models) > 4:
         raise ValueError("At most 4 models allowed in config.json")
     for m in models:
