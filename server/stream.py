@@ -41,7 +41,13 @@ async def council_stream(question: str, config: CouncilConfig):
         prompt = build_debate_prompt(question, r, others)
         debate_tasks.append(query_model(r.model_id, prompt, config))
 
-    debate: list[ModelResponse] = list(await asyncio.gather(*debate_tasks))
+    try:
+        debate: list[ModelResponse] = list(await asyncio.gather(*debate_tasks))
+    except Exception as e:
+        yield json.dumps({"type": "error", "message": f"Debate phase failed: {e}"})
+        yield json.dumps({"type": "done"})
+        return
+
     for r in debate:
         yield json.dumps({
             "type": "model_response",
@@ -103,11 +109,22 @@ Produce a final synthesized answer that:
 Write directly. Start with the answer, not commentary about the process.
 Add this note at the end on its own line: "Note: Model agreement does not guarantee factual accuracy — models may share training biases." """
 
-    final = await query_model(config.synthesizer, synthesis_prompt, config)
     synthesizer_name = next(
         (r.display_name for r in round1 if r.model_id == config.synthesizer),
         config.synthesizer,
     )
+
+    try:
+        final = await query_model(config.synthesizer, synthesis_prompt, config)
+    except Exception as e:
+        yield json.dumps({
+            "type": "final_answer",
+            "content": f"Synthesis failed: {e}",
+            "synthesizer": synthesizer_name,
+        })
+        yield json.dumps({"type": "done"})
+        return
+
     yield json.dumps({
         "type": "final_answer",
         "content": final.content if not final.failed else f"Synthesis failed: {final.error}",
