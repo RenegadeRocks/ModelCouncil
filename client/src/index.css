@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface: #E0E5EC;
+}
+
+html, body, #root {
+  height: 100%;
+  background-color: var(--surface);
+  font-family: 'DM Sans', sans-serif;
+  color: #3D4852;
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #E0E5EC; }
+::-webkit-scrollbar-thumb {
+  background: rgba(163,177,198,0.6);
+  border-radius: 4px;
+}
