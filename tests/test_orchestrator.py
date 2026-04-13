@@ -53,3 +53,36 @@ async def test_run_round1_includes_failed_response(mocker):
     failed = [r for r in results if r.failed]
     assert len(failed) == 1
     assert failed[0].model_id == "claude-sonnet-4-6"
+
+
+@pytest.mark.asyncio
+async def test_run_debate_skips_failed_round1_model(mocker):
+    from council.orchestrator import run_debate
+
+    round1 = [
+        make_response("gpt-4o", "PostgreSQL"),
+        make_response("claude-sonnet-4-6", error="timeout"),
+        make_response("gemini-1.5-pro", "Cassandra"),
+    ]
+    debate_responses = [
+        make_response("gpt-4o", "I agree with Gemini"),
+        make_response("gemini-1.5-pro", "I disagree with GPT"),
+    ]
+    mocker.patch("council.orchestrator.query_model", side_effect=debate_responses)
+    config = make_config()
+    results = await run_debate("Best database?", round1, config)
+    assert len(results) == 2
+
+
+@pytest.mark.asyncio
+async def test_run_debate_returns_empty_when_only_one_active(mocker):
+    from council.orchestrator import run_debate
+
+    round1 = [
+        make_response("gpt-4o", "PostgreSQL"),
+        make_response("claude-sonnet-4-6", error="timeout"),
+        make_response("gemini-1.5-pro", error="timeout"),
+    ]
+    config = make_config()
+    results = await run_debate("Best database?", round1, config)
+    assert results == []
