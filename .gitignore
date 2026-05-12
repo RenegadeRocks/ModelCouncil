@@ -10,3 +10,7 @@ venv/
 .venv/
 env/
 node_modules/
+
+# IDE / agent state
+.claude/
+.vscode/

@@ -5,8 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from dotenv import load_dotenv
 
-VALID_MODELS = {"openai/gpt-4o", "anthropic/claude-sonnet-4-6", "google/gemini-1.5-pro"}
-DEFAULT_MODELS = ["openai/gpt-4o", "anthropic/claude-sonnet-4-6", "google/gemini-1.5-pro"]
+DEFAULT_MODELS = ["openai/gpt-4.1", "anthropic/claude-sonnet-4-6", "google/gemini-2.5-pro-preview"]
 
 
 @dataclass
@@ -36,11 +35,6 @@ def load_config(config_path: Path = _PROJECT_ROOT / "config.json") -> CouncilCon
     debate_rounds = data.get("debate_rounds", 1)
     if len(models) > 4:
         raise ValueError("At most 4 models allowed in config.json")
-    for m in models:
-        if m not in VALID_MODELS:
-            raise ValueError(
-                f"Unknown model '{m}'. Valid options: {sorted(VALID_MODELS)}"
-            )
     if synthesizer not in models:
         raise ValueError(
             f"Synthesizer '{synthesizer}' must be one of the configured models: {models}"

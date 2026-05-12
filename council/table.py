@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import sys
 from council.models import ModelResponse
 from rich.console import Console
 from rich.table import Table
@@ -7,7 +8,7 @@ from rich.table import Table
 POSITION_SYMBOLS: dict[str, str] = {
     "AGREE": "[green]✅ Agree[/green]",
     "DISAGREE": "[red]❌ Disagree[/red]",
-    "PARTIAL": "[yellow]⚠️  Partial[/yellow]",
+    "PARTIAL": "[yellow]⚠  Partial[/yellow]",
 }
 
 EXTRACTION_PROMPT = """You are analyzing a multi-model AI debate. Extract key claims and model positions.
@@ -71,7 +72,7 @@ def parse_extraction(json_text: str, active_models: list[ModelResponse]) -> list
 
 
 def render_table(claims: list[dict], active_models: list[ModelResponse]) -> None:
-    console = Console()
+    console = Console(file=sys.stdout)
     table = Table(
         title="Agreement Table",
         show_header=True,

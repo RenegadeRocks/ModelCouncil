@@ -7,7 +7,8 @@ from rich.panel import Panel
 from council.config import CouncilConfig
 from council.models import ModelResponse, query_all, query_model
 
-console = Console()
+import sys
+console = Console(file=sys.stdout)
 
 
 async def run_round1(question: str, config: CouncilConfig) -> list[ModelResponse]:
@@ -123,7 +124,7 @@ Produce a final synthesized answer that:
 4. Briefly notes where models differ without belaboring it
 
 Write directly. Start with the answer, not commentary about the process.
-Add this note at the end on its own line: "⚠️ Note: Model agreement does not guarantee factual accuracy — models may share training biases." """
+Add this note at the end on its own line: "Note: Model agreement does not guarantee factual accuracy — models may share training biases." """
 
     response = await query_model(config.synthesizer, synthesis_prompt, config)
     if response.failed:
