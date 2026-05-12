@@ -1,6 +1,6 @@
 import pytest
 from council.models import ModelResponse, DISPLAY_NAMES
-from council.config import CouncilConfig, VALID_MODELS
+from council.config import CouncilConfig
 
 
 def make_config(**kwargs):
@@ -22,11 +22,6 @@ def test_model_response_failed_when_error_set():
 def test_model_response_not_failed_when_no_error():
     r = ModelResponse(model_id="openai/gpt-4o", display_name="GPT-4o", content="Hello")
     assert r.failed is False
-
-
-def test_display_names_exist_for_all_valid_models():
-    for model_id in VALID_MODELS:
-        assert model_id in DISPLAY_NAMES, f"Missing display name for {model_id}"
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import re
 import sys
 from council.models import ModelResponse
 from rich.console import Console
@@ -64,9 +65,9 @@ def build_extraction_prompt(
 
 def parse_extraction(json_text: str, active_models: list[ModelResponse]) -> list[dict]:
     text = json_text.strip()
-    if text.startswith("```"):
-        lines = text.split("\n")
-        text = "\n".join(lines[1:-1]).strip()
+    match = re.search(r"```(?:json)?\s*\n(.*?)```", text, re.DOTALL)
+    if match:
+        text = match.group(1).strip()
     data = json.loads(text)
     return data.get("claims", [])
 
